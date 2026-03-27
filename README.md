@@ -2,6 +2,10 @@
 
 Command your C64 Ultimate from the terminal.
 
+[![npm version](https://img.shields.io/npm/v/@jeffsand/c64)](https://www.npmjs.com/package/@jeffsand/c64)
+[![CI](https://github.com/jeffsand/c64/actions/workflows/ci.yml/badge.svg)](https://github.com/jeffsand/c64/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 <p align="center">
   <img src="demo.gif" alt="c64 CLI demo" width="900">
 </p>
