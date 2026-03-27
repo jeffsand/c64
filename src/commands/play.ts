@@ -1,18 +1,20 @@
 /**
  * c64 play -- Full play sequence: mount, reset, LOAD, RUN.
  *
- * Supports direct paths, URLs, zip archives, and directories.
- * Resolves the input first, then runs the full boot sequence.
+ * Supports device paths, local files, URLs, zip archives, and directories.
+ * Local files are uploaded to /Temp/ on the device first.
  */
+import { basename } from "node:path";
 import { UltimateClient } from "../api/rest.js";
 import { tcpReset, tcpType } from "../api/socket.js";
 import { resolveHost, resolveTimeout } from "../config.js";
 import { NoHostConfiguredError } from "../error.js";
 import { printInfo, printSuccess, printError } from "../output.js";
 import { resolve } from "../resolve.js";
+import { ftpUpload } from "./upload.js";
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 export async function play(file: string, opts: Record<string, unknown>): Promise<void> {
@@ -25,14 +27,27 @@ export async function play(file: string, opts: Record<string, unknown>): Promise
   const timeout = resolveTimeout(opts);
 
   try {
-    const resolved = await resolve(file);
+    let remotePath: string;
+    let displayName: string;
 
-    if (resolved.cleanup) {
-      printInfo("Note: upload not yet implemented -- resolved file is local only.", opts);
+    if (file.startsWith("/")) {
+      remotePath = file;
+      displayName = basename(file);
+    } else {
+      const resolved = await resolve(file);
+      displayName = resolved.originalName;
+      const safeName = basename(resolved.path).replace(/ /g, "_").replace(/'/g, "").replace(/"/g, "");
+      remotePath = `/Temp/${safeName}`;
+
+      printInfo(`Uploading ${displayName} to device...`, opts);
+      if (!ftpUpload(host, resolved.path, remotePath, timeout)) {
+        printError(`Failed to upload ${displayName}`, `Check device FTP at ${host}:21`);
+        process.exit(3);
+      }
     }
 
-    printInfo(`Mounting ${resolved.originalName} to Drive ${drive.toUpperCase()}...`, opts);
-    await client.mount(drive, resolved.path);
+    printInfo(`Mounting ${displayName} to Drive ${drive.toUpperCase()}...`, opts);
+    await client.mount(drive, remotePath);
 
     printInfo("Resetting C64...", opts);
     await tcpReset(host, timeout);
@@ -46,7 +61,7 @@ export async function play(file: string, opts: Record<string, unknown>): Promise
     printInfo("Typing: RUN", opts);
     await tcpType(host, "RUN\r", timeout);
 
-    printSuccess(`Playing ${resolved.originalName}`, opts);
+    printSuccess(`Playing ${displayName}`, opts);
   } catch (err: unknown) {
     printError(`Failed to play: ${(err as Error).message}`);
     process.exit(3);
