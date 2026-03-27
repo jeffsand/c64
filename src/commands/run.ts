@@ -1,36 +1,48 @@
 /**
- * c64 run -- Auto-detect file type and run.
+ * c64 run -- Auto-detect file type and run (CRT/PRG/D64).
+ *
+ * Supports direct paths, URLs, zip archives, and directories.
+ * Resolves the input first, then dispatches to the appropriate API call.
  */
+import { extname } from "node:path";
 import { UltimateClient } from "../api/rest.js";
 import { resolveHost, resolveTimeout } from "../config.js";
 import { NoHostConfiguredError, UnsupportedFormatError } from "../error.js";
 import { printSuccess, printError, printInfo } from "../output.js";
+import { resolve } from "../resolve.js";
 
 export async function run(file: string, opts: Record<string, unknown>): Promise<void> {
   const host = resolveHost(opts);
   if (!host) throw new NoHostConfiguredError();
   const client = new UltimateClient(host, resolveTimeout(opts));
-  const ext = file.split(".").pop()?.toLowerCase() ?? "";
+
   try {
+    const resolved = await resolve(file);
+
+    if (resolved.cleanup) {
+      printInfo("Note: upload not yet implemented -- resolved file is local only.", opts);
+    }
+
+    const ext = extname(resolved.path).toLowerCase().replace(".", "");
     switch (ext) {
       case "crt":
-        printInfo(`Running cartridge: ${file}`, opts);
-        await client.runCrt(file);
+        printInfo(`Running cartridge: ${resolved.originalName}`, opts);
+        await client.runCrt(resolved.path);
         break;
       case "prg":
-        printInfo(`Running PRG: ${file}`, opts);
-        await client.runPrg(file);
+        printInfo(`Running PRG: ${resolved.originalName}`, opts);
+        await client.runPrg(resolved.path);
         break;
       case "d64":
       case "g64":
       case "t64":
-        printInfo(`Mounting and loading: ${file}`, opts);
-        await client.mount("a", file);
+        printInfo(`Mounting and loading: ${resolved.originalName}`, opts);
+        await client.mount("a", resolved.path);
         break;
       default:
-        throw new UnsupportedFormatError(file);
+        throw new UnsupportedFormatError(resolved.originalName);
     }
-    printSuccess(`Running ${file}`, opts);
+    printSuccess(`Running ${resolved.originalName}`, opts);
   } catch (err: unknown) {
     if (err instanceof UnsupportedFormatError) {
       printError(err.message, err.help);

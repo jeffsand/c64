@@ -2,8 +2,9 @@
  * c64 config -- Manage configuration.
  */
 
+import { createInterface } from "node:readline";
 import { loadConfig, saveConfig, configPath, type Config } from "../config.js";
-import { printData, printSuccess, printError } from "../output.js";
+import { printData, printSuccess, printError, printInfo } from "../output.js";
 
 /** Show current configuration. */
 export async function configShow(opts: Record<string, unknown>): Promise<void> {
@@ -67,7 +68,78 @@ export async function configSet(
   printSuccess(`Set ${key} = ${value}`, opts);
 }
 
-/** Interactive first-time setup. */
+/**
+ * Prompt the user for a line of input.
+ */
+function prompt(question: string): Promise<string> {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stderr,
+  });
+
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    });
+  });
+}
+
+/**
+ * Interactive first-time setup.
+ *
+ * With --no-input, creates a default config without prompting.
+ * Otherwise, asks the user for the device host.
+ */
 export async function configInit(opts: Record<string, unknown>): Promise<void> {
-  console.error("Not yet implemented. Coming in Phase 7 (with discover).");
+  const config = loadConfig();
+
+  if (opts["input"] === false) {
+    // --no-input: just create default config
+    saveConfig(config);
+    printSuccess(`Config created at ${configPath()}`, opts);
+    if (opts["json"]) {
+      printData(config, opts);
+    }
+    return;
+  }
+
+  // Interactive setup
+  printInfo("C64 Ultimate CLI -- first-time setup", opts);
+  printInfo("", opts);
+
+  const hostAnswer = await prompt(
+    `Device IP address${config.device.host ? ` [${config.device.host}]` : ""} (or run 'c64 discover'): `
+  );
+
+  if (hostAnswer) {
+    config.device.host = hostAnswer;
+  }
+
+  const timeoutAnswer = await prompt(
+    `Connection timeout in seconds [${config.device.timeout}]: `
+  );
+  if (timeoutAnswer) {
+    const num = parseInt(timeoutAnswer, 10);
+    if (!isNaN(num) && num > 0) {
+      config.device.timeout = num;
+    }
+  }
+
+  const driveAnswer = await prompt(
+    `Default drive letter (a/b) [${config.defaults.drive}]: `
+  );
+  if (driveAnswer === "a" || driveAnswer === "b") {
+    config.defaults.drive = driveAnswer;
+  }
+
+  saveConfig(config);
+  printSuccess(`Config saved to ${configPath()}`, opts);
+
+  if (opts["json"]) {
+    printData(config, opts);
+  } else {
+    printInfo("", opts);
+    console.log(JSON.stringify(config, null, 2));
+  }
 }
