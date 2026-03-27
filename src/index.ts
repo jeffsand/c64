@@ -12,20 +12,17 @@ import { C64Error, EXIT } from "./error.js";
 import { printError } from "./output.js";
 import { notifyIfUpdateAvailable, scheduleUpdateCheck } from "./update-check.js";
 
-const program = createCli();
+// Schedule background update check early (fire-and-forget, never blocks)
+scheduleUpdateCheck();
 
 // Show update notice if a newer version was found on a previous run
-const globalOpts = program.opts();
-notifyIfUpdateAvailable(globalOpts);
+notifyIfUpdateAvailable({});
 
-// Global error handler -- catch C64Error and display helpful messages
+const program = createCli();
 program.exitOverride();
 
 try {
   await program.parseAsync();
-
-  // After successful command, schedule a background update check
-  scheduleUpdateCheck();
 } catch (err: unknown) {
   if (err instanceof C64Error) {
     printError(err.message, err.help);

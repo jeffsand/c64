@@ -16,7 +16,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { fork } from "node:child_process";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { configDir } from "./config.js";
 import { version } from "./version.js";
@@ -97,12 +97,14 @@ export function scheduleUpdateCheck(): void {
     // Proceed with check if cache is unreadable
   }
 
-  // Spawn background checker as a detached child
+  // Spawn background checker as a fully detached child process.
+  // Using spawn + node instead of fork for more reliable detachment.
   try {
     const checkerPath = fileURLToPath(new URL("./update-worker.js", import.meta.url));
-    const child = fork(checkerPath, [], {
+    const child = spawn(process.execPath, [checkerPath], {
       detached: true,
       stdio: "ignore",
+      env: { ...process.env },
     });
     child.unref();
   } catch {
