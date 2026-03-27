@@ -58,6 +58,9 @@ c64 discover --save
 # Check device status
 c64 info
 
+# Try the included demo disk
+c64 play node_modules/@jeffsand/c64/fixtures/test.d64
+
 # Play a game (uploads from your Mac, mounts, resets, types LOAD + RUN)
 c64 play game.d64
 
@@ -221,6 +224,20 @@ The CLI communicates with the C64 Ultimate using three protocols:
 - **FTP (port 21)** -- file uploads and directory listing
 
 All communication happens over your local network. No internet connection required. No cloud services. Just you and your C64.
+
+## Demo Disk
+
+A demo D64 disk image is included with the package. It runs a BASIC program on your C64 that shows the c64 CLI boot screen with border color cycling:
+
+```bash
+c64 play node_modules/@jeffsand/c64/fixtures/test.d64
+```
+
+The program is pure Commodore BASIC -- type `LIST` on your C64 to read the source. After the demo, try injecting the current date from your Mac:
+
+```bash
+c64 type "PRINT \"$(date '+%A %B %d %Y')\"\\r"
+```
 
 ## Data Disks
 
