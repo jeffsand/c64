@@ -35,7 +35,7 @@ brew tap jeffsand/tools && brew install c64
 ## Requirements
 
 - Node.js 20 or later
-- A [C64 Ultimate](https://ultimate64.com/) device on your local network
+- A [Commodore C64 Ultimate](https://www.commodore.net) device on your local network
   (Ultimate 64, Ultimate 64 Elite, Ultimate-II+, or Ultimate-II+L)
 
 ## Install
