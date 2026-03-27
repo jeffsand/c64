@@ -2,17 +2,38 @@
  * c64 info -- Show device info and status.
  */
 
-import { resolveHost } from "../config.js";
-import { NoHostConfiguredError } from "../error.js";
-import { printInfo } from "../output.js";
+import { UltimateClient } from "../api/rest.js";
+import { resolveHost, resolveTimeout } from "../config.js";
+import { NoHostConfiguredError, type C64Error } from "../error.js";
+import { printTable, printData, printError } from "../output.js";
 
 export async function info(opts: Record<string, unknown>): Promise<void> {
   const host = resolveHost(opts);
   if (!host) throw new NoHostConfiguredError();
 
-  printInfo(`Connecting to ${host}...`, opts);
+  const client = new UltimateClient(host, resolveTimeout(opts));
 
-  // Phase 2: implement REST API call to /v1/info
-  console.error("Not yet implemented. Coming in Phase 2.");
-  console.error(`Will query: http://${host}/v1/info`);
+  try {
+    const device = await client.info();
+
+    if (opts["json"]) {
+      printData(device, opts);
+    } else {
+      printTable([
+        { label: "Product", value: device.product },
+        { label: "Firmware", value: device.firmwareVersion },
+        { label: "FPGA", value: device.fpgaVersion },
+        { label: "Core", value: device.coreVersion },
+        { label: "Hostname", value: device.hostname },
+        { label: "ID", value: device.uniqueId },
+      ], opts);
+    }
+  } catch (err: unknown) {
+    const e = err as C64Error;
+    if (e.help) {
+      printError(e.message, e.help);
+      process.exit(e.exitCode ?? 1);
+    }
+    throw err;
+  }
 }
