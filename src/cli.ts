@@ -251,6 +251,41 @@ Examples:
       await diskDir(id, cmd.optsWithGlobals());
     });
 
+  // ── Watch ────────────────────────────────────────────────────
+
+  program
+    .command("watch")
+    .description("Watch drive status for changes (polls every 2s)")
+    .addHelpText("after", `
+Examples:
+  c64 watch                Poll and display drive changes
+  c64 watch --host 10.0.0.5`)
+    .action(async (_opts, cmd) => {
+      const { watch } = await import("./commands/watch.js");
+      await watch(cmd.optsWithGlobals());
+    });
+
+  // ── Shell Completions ───────────────────────────────────────
+
+  program
+    .command("completions")
+    .description("Generate shell completions")
+    .argument("<shell>", "Shell type: bash, zsh, or fish")
+    .addHelpText("after", `
+Examples:
+  c64 completions bash >> ~/.bashrc
+  c64 completions zsh > ~/.zfunc/_c64
+  c64 completions fish > ~/.config/fish/completions/c64.fish`)
+    .action(async (shell, _opts, _cmd) => {
+      const { generate } = await import("./completions.js");
+      const script = generate(shell);
+      if (!script) {
+        console.error(`Unsupported shell: ${shell}. Use bash, zsh, or fish.`);
+        process.exit(2);
+      }
+      process.stdout.write(script);
+    });
+
   // ── Configuration ─────────────────────────────────────────────
 
   const config = program

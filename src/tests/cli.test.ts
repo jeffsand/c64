@@ -54,6 +54,8 @@ describe("c64 CLI", () => {
     assert.ok(out.includes("discover"), "should list discover command");
     assert.ok(out.includes("disk"), "should list disk command");
     assert.ok(out.includes("config"), "should list config command");
+    assert.ok(out.includes("watch"), "should list watch command");
+    assert.ok(out.includes("completions"), "should list completions command");
   });
 
   it("info --help shows info-specific help with examples", () => {
@@ -82,6 +84,38 @@ describe("c64 CLI", () => {
   it("--quiet flag is accepted globally", () => {
     const result = run("--quiet", "--help");
     assert.equal(result.code, 0);
+  });
+});
+
+describe("c64 completions", () => {
+  it("completions bash outputs a bash script", () => {
+    const result = run("completions", "bash");
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("_c64_completions"), "should define bash completion function");
+    assert.ok(result.stdout.includes("complete -F"), "should register completion");
+  });
+
+  it("completions zsh outputs a zsh script", () => {
+    const result = run("completions", "zsh");
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("#compdef c64"), "should have compdef header");
+    assert.ok(result.stdout.includes("_describe"), "should use _describe");
+  });
+
+  it("completions fish outputs a fish script", () => {
+    const result = run("completions", "fish");
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("complete -c c64"), "should define fish completions");
+  });
+
+  it("completions with unsupported shell exits non-zero", () => {
+    const result = run("completions", "powershell");
+    assert.notEqual(result.code, 0);
+  });
+
+  it("completions without argument exits non-zero", () => {
+    const result = run("completions");
+    assert.notEqual(result.code, 0);
   });
 });
 
