@@ -2,23 +2,9 @@
 
 Command your C64 Ultimate from the terminal.
 
-```
-$ c64 info
-  Product   Ultimate 64 Elite
-  Firmware  3.14
-  FPGA      121
-  Hostname  C64-Ultimate
-  Drive A   1541 -- (empty)
-  Drive B   1541 -- (empty)
-
-$ c64 play game.d64
-Uploading game.d64 to device...
-Mounting game.d64 to Drive A...
-Resetting C64...
-Typing: LOAD"*",8,1
-Typing: RUN
-OK Playing game.d64
-```
+<p align="center">
+  <img src="demo.gif" alt="c64 CLI demo" width="900">
+</p>
 
 ## Features
 
@@ -41,7 +27,7 @@ OK Playing game.d64
 ## Install
 
 ```bash
-npm install -g c64
+npm install -g @jeffsand/c64
 ```
 
 ## Quick Start

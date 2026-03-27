@@ -1,5 +1,5 @@
 {
-  "name": "c64",
+  "name": "@jeffsand/c64",
   "version": "0.1.0",
   "description": "Command your C64 Ultimate from the terminal.",
   "bin": {
