@@ -1,6 +1,6 @@
 # c64
 
-A CLI for the [C64 Ultimate](https://www.commodore.net) -- mount disks, run cartridges, type on the keyboard, and control your C64 from the terminal.
+A CLI for the [Commodore C64 Ultimate](https://www.commodore.net) -- mount disks, run cartridges, type on the keyboard, and control your Commodore 64 from the terminal.
 
 [![npm version](https://img.shields.io/npm/v/@jeffsand/c64)](https://www.npmjs.com/package/@jeffsand/c64)
 [![CI](https://github.com/jeffsand/c64/actions/workflows/ci.yml/badge.svg)](https://github.com/jeffsand/c64/actions/workflows/ci.yml)
