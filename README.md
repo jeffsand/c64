@@ -185,6 +185,9 @@ c64 completions zsh > ~/.zfunc/_c64
 
 # Fish
 c64 completions fish > ~/.config/fish/completions/c64.fish
+
+# PowerShell
+c64 completions powershell >> $PROFILE
 ```
 
 ## For Scripting and Agents

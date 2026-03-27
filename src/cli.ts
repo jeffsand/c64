@@ -270,7 +270,7 @@ Examples:
   program
     .command("completions")
     .description("Generate shell completions")
-    .argument("<shell>", "Shell type: bash, zsh, or fish")
+    .argument("<shell>", "Shell type: bash, zsh, fish, or powershell")
     .addHelpText("after", `
 Examples:
   c64 completions bash >> ~/.bashrc
@@ -280,7 +280,7 @@ Examples:
       const { generate } = await import("./completions.js");
       const script = generate(shell);
       if (!script) {
-        console.error(`Unsupported shell: ${shell}. Use bash, zsh, or fish.`);
+        console.error(`Unsupported shell: ${shell}. Use bash, zsh, fish, or powershell.`);
         process.exit(2);
       }
       process.stdout.write(script);

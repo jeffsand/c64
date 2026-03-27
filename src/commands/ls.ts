@@ -7,6 +7,7 @@
 
 import { execFileSync } from "node:child_process";
 import { basename, extname } from "node:path";
+import { platform } from "node:os";
 import chalk from "chalk";
 import { resolveHost, resolveTimeout } from "../config.js";
 import { NoHostConfiguredError } from "../error.js";
@@ -30,13 +31,14 @@ function ftpList(host: string, path: string, timeout: number): string[] | null {
   const url = `ftp://anonymous@${host}${dirPath}`;
 
   try {
-    const output = execFileSync("curl", [
+    const curl = platform() === "win32" ? "curl.exe" : "curl";
+    const output = execFileSync(curl, [
       "-s",
       "--list-only",
       url,
       "--connect-timeout", String(Math.ceil(timeout / 1000)),
       "--max-time", "15",
-    ], { encoding: "utf-8", timeout: 20000 });
+    ], { encoding: "utf-8", timeout: 20000, windowsHide: true });
 
     return output
       .split("\n")

@@ -66,6 +66,28 @@ ${lines.join("\n")}
 `;
 }
 
+export function generatePowerShell(): string {
+  const entries = COMMANDS.map(
+    (c) => `        @{ Name = '${c.name}'; Tooltip = '${c.description}' }`,
+  ).join("\n");
+  return `# c64 PowerShell completions
+# Add to your $PROFILE:
+#   c64 completions powershell | Out-String | Invoke-Expression
+
+Register-ArgumentCompleter -CommandName c64 -ScriptBlock {
+    param($wordToComplete, $commandAst, $cursorPosition)
+    $commands = @(
+${entries}
+    )
+    $commands | Where-Object { $_.Name -like "$wordToComplete*" } | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new(
+            $_.Name, $_.Name, 'ParameterValue', $_.Tooltip
+        )
+    }
+}
+`;
+}
+
 export function generate(shell: string): string | null {
   switch (shell) {
     case "bash":
@@ -74,6 +96,9 @@ export function generate(shell: string): string | null {
       return generateZsh();
     case "fish":
       return generateFish();
+    case "powershell":
+    case "pwsh":
+      return generatePowerShell();
     default:
       return null;
   }

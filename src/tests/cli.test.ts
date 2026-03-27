@@ -108,8 +108,21 @@ describe("c64 completions", () => {
     assert.ok(result.stdout.includes("complete -c c64"), "should define fish completions");
   });
 
-  it("completions with unsupported shell exits non-zero", () => {
+  it("completions powershell outputs a PowerShell script", () => {
     const result = run("completions", "powershell");
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("Register-ArgumentCompleter"), "should register completer");
+    assert.ok(result.stdout.includes("CompletionResult"), "should return CompletionResult");
+  });
+
+  it("completions pwsh also works", () => {
+    const result = run("completions", "pwsh");
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("Register-ArgumentCompleter"));
+  });
+
+  it("completions with unsupported shell exits non-zero", () => {
+    const result = run("completions", "tcsh");
     assert.notEqual(result.code, 0);
   });
 

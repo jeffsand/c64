@@ -9,6 +9,7 @@
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 import { execFileSync } from "node:child_process";
+import { platform } from "node:os";
 import { resolveHost, resolveTimeout } from "../config.js";
 import { NoHostConfiguredError } from "../error.js";
 import { printSuccess, printError, printInfo } from "../output.js";
@@ -31,21 +32,33 @@ function safeName(filename: string): string {
  * Upload a local file to the Ultimate via FTP using curl.
  * Returns true on success.
  */
+/**
+ * Find the curl binary. On Windows, curl.exe is in System32 since Windows 10.
+ * On macOS/Linux it's just "curl" on PATH.
+ */
+function findCurl(): string {
+  if (platform() === "win32") {
+    return "curl.exe";
+  }
+  return "curl";
+}
+
 export function ftpUpload(host: string, localPath: string, remotePath: string, timeout: number): boolean {
   const url = `ftp://anonymous@${host}${remotePath}`;
+  const curl = findCurl();
   try {
     // The Ultimate's FTP server sometimes does not send "226 Transfer complete"
     // after a successful upload, causing curl to timeout waiting for it.
     // We use a short --max-time and treat exit code 28 (timeout) as success
     // if the data was fully sent.
-    execFileSync("curl", [
+    execFileSync(curl, [
       "-s",
       "-T", localPath,
       url,
       "--connect-timeout", String(Math.ceil(timeout / 1000)),
       "--max-time", "15",
       "--ftp-create-dirs",
-    ], { timeout: 20000 });
+    ], { timeout: 20000, windowsHide: true });
     return true;
   } catch (err: unknown) {
     // Exit code 28 = timeout -- the upload likely completed but the server
