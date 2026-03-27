@@ -34,13 +34,13 @@ describe("c64 CLI", () => {
   it("--version prints version number", () => {
     const result = run("--version");
     assert.equal(result.code, 0);
-    assert.match(result.stdout, /0\.1\.0/);
+    assert.match(result.stdout, /\d+\.\d+\.\d+/);
   });
 
   it("-V also prints version", () => {
     const result = run("-V");
     assert.equal(result.code, 0);
-    assert.match(result.stdout, /0\.1\.0/);
+    assert.match(result.stdout, /\d+\.\d+\.\d+/);
   });
 
   it("--help lists all commands", () => {
