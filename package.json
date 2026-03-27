@@ -1,6 +1,6 @@
 {
   "name": "@jeffsand/c64",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Command your C64 Ultimate from the terminal.",
   "bin": {
     "c64": "./dist/index.js"
